@@ -1,6 +1,6 @@
 # KSOpenAopt 开放功能
 
-KSOpenAopt 项目提供了适用于网易我的世界 KID动作优化/剑魂 的扩展(数据包) API/解决方案
+KSOpenAopt 提供了适用于网易我的世界 KID动作优化/剑魂 的扩展(数据包) API/解决方案
 
 后续将以 AOPT 简称 KID动作优化/剑魂
 
