@@ -1,0 +1,24 @@
+{
+    "package": "test_package",  // 应修改为您的项目名(需遵循命名规范 推荐小写下划线命名)
+    "jsonOptimize": true,
+    "pyReload": true,
+    // "debug": false,
+    // "addon++": false,
+    "modules": [
+        // 添加两个.dll文件引用同一个目录(AOPTRes), 可以同时支持KID和剑魂的构建
+        {
+            "lib": "libs/KAOBuildLib",
+            "path": "aopt",
+            "description": "[v1.0.0] KID动作优化扩展包构建支持"
+        },
+        {
+            "lib": "libs/SAOBuildLib",
+            "path": "aopt",
+            "description": "[v1.0.0] 剑魂扩展包构建支持"
+        },
+        {
+            "lib": "libs/CheckAOPT",
+            "description": "用于生成运行时的前置环境检查(KID动作优化/剑魂), 如果不存在则弹出提示"
+        }
+    ]
+}

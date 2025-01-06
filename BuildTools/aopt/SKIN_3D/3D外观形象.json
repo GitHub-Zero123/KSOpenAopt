@@ -1,0 +1,11 @@
+{
+    "type": "custom_3d_skin",
+    "skin_name": "这是一个3D的皮肤",
+    "icon": "apple.png",
+    "texture": "apple2.png",
+    "geometry": "geometry.test_model",
+    // 选填 allow_face_expressions 是否允许面部表情(仅支持KID) 默认为false
+    "allow_face_expressions": true,
+    // 选填 默认动画播放(循环) 用于调整模型细节亦或者动画表现
+    "default_animation": "animation.armor_stand.brandish_pose"
+}

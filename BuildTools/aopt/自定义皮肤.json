@@ -1,0 +1,8 @@
+{
+    "type": "custom_skin",
+    "skin_name": "这是一个测试皮肤",
+    // "skin_id": "test1", // 在不指定skin_id的情况下会自动分配
+    "icon": "apple.png",
+    "texture": "apple.png"
+    // "skin_type": "slim" // 可选参数, 如果不指定则默认为粗手模型
+}

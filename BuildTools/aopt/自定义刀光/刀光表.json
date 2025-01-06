@@ -1,0 +1,7 @@
+{
+    "type": "custom_sword_trail_textures",  // 识别类型
+    "textures": [
+        "test1.png",    // 完整路径查找
+        "test2.png"     // 相对路径查找(当前目录)
+    ]
+}
