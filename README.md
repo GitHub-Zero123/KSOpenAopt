@@ -107,6 +107,7 @@ BuildTools提供了适用于双AOPT的低代码扩展包构建解决方案 实�
     "default_items": [],         // 选填 若定义可为特定物品默认添加此攻击预设
     "attack_type": "default",    // 默认default 可选random(将随机选择子节点攻击)
     "custom_sounds": {},         // [标准] 选填 自定义sounds到玩家资源(多个MOD相同的键位名会互相覆盖 若非重复资源请尽可能避免重复键名)
+    "off_hand": false,           // 默认false 用于声明ATE类型是否为副手
     // rt_参数由构建系统生成 (以下参数仅为python层提供 非用户数据)
     // "rt_bind_query": "query.mod.xxx",            // [标准] rt_bind_query必定会被生成 用于控制攻击下标 0为终止
     // "rt_anim_load": "ks_aopt_{&ate_id}_root",    // [标准] rt_anim_load的动画控制器key理应持续工作 以便及时混合动画
