@@ -23,7 +23,7 @@ BuildTools提供了适用于双AOPT的低代码扩展包构建解决方案 实�
     // "debug": false,
     // "addon++": false,
     "modules": [
-        // 添加两个.dll文件引用同一个目录(AOPTRes), 可以同时支持KID和剑魂的构建
+        // 添加两个.dll文件引用同一个目录(aopt/*), 可以同时支持KID和剑魂的构建
         {
             "lib": "libs/KAOBuildLib",
             "path": "aopt",     // 配置path目录 提供Build支持
