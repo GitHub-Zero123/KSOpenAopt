@@ -143,8 +143,12 @@ BuildTools提供了适用于双AOPT的低代码扩展包构建解决方案 实�
             "cmd_time_line": {
                 "0.5": [    // [标准] 可选 str | list[str]
                     "/say 唱跳RAP",
-                    // [标准] 仅/开头为指令执行 其他关键字则代表其他功能(待定)
-                    "/say 我是雪豹"
+                    // [标准] 仅/开头为指令执行
+                    "/say 我是雪豹",
+                    "xxx(1, true)", // 引用内置自定义函数 此处参数类型依然遵循json而不是py(bool)
+                    // 自定义扩展函数执行 其中服务端函数会额外传递一个playerId参数在最前面
+                    "server::myMod::xxxFile::func(...)", // 命名空间规范调用自定义函数(myMod.xxxFile中的func) 其中server命名空间代表服务端执行(标记性)
+                    "client::myMod::xxxFile::func(...)", // 同上 区别为客户端执行
                 ]
             },
             "blockbench": false,        // [标准] 默认false 声明使用blockbench模式 若为true move_time_line的z轴将反向解析 同时移动单位将按像素(16=1格)处理
