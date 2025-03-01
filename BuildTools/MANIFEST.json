@@ -5,7 +5,12 @@
     // "debug": false,
     // "addon++": false,
     "modules": [
-        // 添加两个.dll文件引用同一个目录(AOPTRes), 可以同时支持KID和剑魂的构建
+        // 添加多个.dll文件引用同一个目录(AOPTRes), 可以同时支持KID和剑魂的构建
+        // {
+        //     "lib": "libs/YsmConvert",
+        //     "path": "aopt",
+        //     "description": "[v1.0.0] YSM 3D外观转换兼容库"
+        // },
         {
             "lib": "libs/KAOBuildLib",
             "path": "aopt",
@@ -18,7 +23,7 @@
         },
         {
             "lib": "libs/CheckAOPT",
-            "description": "用于生成运行时的前置环境检查(KID动作优化/剑魂), 如果不存在则弹出提示"
+            "description": "用于生成运行时的前置环境检查(KID动作优化/剑魂/YSM), 如果不存在则弹出提示"
         }
     ]
 }
