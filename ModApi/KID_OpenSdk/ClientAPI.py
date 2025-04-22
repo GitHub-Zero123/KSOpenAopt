@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import mod.client.extraClientApi as clientApi
 from SharedRes import KBaseAPI, OO_STRUCT
-from GL_OPT_CLS import IBattleHandle, IUSER_RUNTIME
+from GL_OPT_CLS import IBattleHandler, IUSER_RUNTIME
 lambda: "By Zero123"
 """
     >> 受MOD加载先后顺序以及一些功能延后处理问题
@@ -76,6 +76,13 @@ class CustomSkinModel(OO_STRUCT):
         self.loadAnims = {}
         self.loopAnim = None
         self.renderName = skinTypeName
+        self._evalEventCall = None
+
+    def setEvalEventCall(self, strEval):
+        # type: (str) -> CustomSkinModel
+        """ 设置事件动态执行表达式 """
+        self._evalEventCall = strEval
+        return self
     
     def setCustomAnims(self, newAnimsDict={}):
         """ 设置自定义动画覆盖表 """
@@ -124,6 +131,29 @@ class CustomSkinModel(OO_STRUCT):
         self.useModel = model
         return self
 
+class OO_MCLS_REF:
+    @staticmethod
+    def bindTarget(modulePath=""):
+        def _loader(cls):
+            if 1 > 2:
+                return cls
+            module = kapi.impModFile(modulePath)
+            name = cls.__name__
+            return getattr(module, name)
+        return _loader
+
+    @staticmethod
+    def lazyFuncBindTarget(modulePath=""):
+        def _loader(func):
+            funcName = func.__name__
+            if 1 > 2:
+                return func
+            def castFunc(*args, **kwargs):
+                module = kapi.impModFile(modulePath)
+                return getattr(module, funcName)(*args, **kwargs)
+            return castFunc
+        return _loader
+
 class _KAPI(KBaseAPI):
     def __init__(self):
         KBaseAPI.__init__(self)
@@ -134,7 +164,7 @@ class _KAPI(KBaseAPI):
         # type: (str) -> object | None
         """ 导入加载模块 """
         return clientApi.ImportModule(_path)
-    
+
     def getATEOpenState(self):
         # type: () -> bool
         """ 获取战斗扩展开启状态 """
@@ -159,7 +189,7 @@ class _KAPI(KBaseAPI):
         # type: (str, int) -> bool
         """ 修改游戏设置状态(存档) 该操作会立即更新资源设置 请勿频繁使用 """
         return getattr(self.getBaseAPI(), "CLIENT_SET_GAME_SETTING_VALUE")(useKey, newState)
-    
+
     def regCustomFunction(self, renderText="未命名功能", funcObj=lambda: None, closeUI=True):
         # type: (str, object, bool) -> object
         """ 在更多功能中注册自定义功能(非唯一性允许多次注册)将返回此功能的object对象 可以动态取消注册 """
@@ -175,13 +205,13 @@ class _KAPI(KBaseAPI):
         """ 注册自定义皮肤模型 """
         getattr(self.getBaseAPI(), "CLIENT_REG_CUSTOM_SKIN")(skinModelData)
         return skinModelData
-    
+
     def hidePlayerArmor(self, state=False):
         # type: (bool) -> None
         """ [因兼容问题暂时弃用] 设置是否隐藏本地玩家盔甲渲染(通过延迟请求低功耗自动同步服务端)
         """
         return getattr(self.getBaseAPI(), "CLIENT_HIDE_PLAYER_ARMOR")(state)
-    
+
     def regItemBaseATE(self, itemName="", ateId=1):
         # type: (str, int) -> bool
         """ 注册物品默认ATE预设(对应自定义ATE中的预置逻辑id同理 0为保留值请勿使用) """
@@ -225,10 +255,9 @@ class _KAPI(KBaseAPI):
         """ 批量添加自定义刀光选项纹理图 文件所在路径必须在textures/models/* """
         return getattr(self.getBaseAPI(), "CLIENT_ADD_CUSTOM_CKL_IMGS")(imgs)
 
-    def regCustomJsonATE(self, joDict):
-        # type: (dict) -> None
-        """ 注册JSON ATE扩展 注意:静态资源的合批处理是在AddonFinish事件下进行的 请在此之前调用 亦或者将监听事件优先级提高(内部使用0) """
-        return getattr(self.getBattleExpansionAPI(), "JSON_CLIENT_REG_CUSTOM_ATE")(joDict)
+    def call(self, funcName="", *args, **kwargs):
+        """ 标准化调用服务端注册函数(通过延迟数据包) """
+        return getattr(self.getBaseAPI(), "STD_CLIENT_CALL")(funcName, args, kwargs)
 
 class KATE_API(_KAPI):
     def getATEApi(self):
@@ -284,12 +313,12 @@ class KATE_API(_KAPI):
         # type: (float | int) -> None
         """ 设置ATE攻击范围偏移(原范围基础上追加) 全局独立层区 """
         return getattr(self.getBattleExpansionAPI(), "SET_ATE_MODATT_RANGE_OFFSET")(v)
-    
+
     def setItemRangeOffset(self, itemName="", v=0.0):
         # type: (str, float | int) -> None
         """ 设置特定物品ATE攻击范围偏移(原范围基础上追加) 个体独立层区 """
         return getattr(self.getBattleExpansionAPI(), "SET_ATE_ITEM_RANGE_OFFSET")(itemName, v)
-    
+
     def setDisATEState(self, state=True):
         # type: (bool) -> None
         """ 设置是否禁用ATE操作(自动打断) 禁用后UI按键将处于不可交互状态适用于技能扩展
@@ -314,7 +343,7 @@ class KATE_API(_KAPI):
         # type: (int, str, str) -> object
         """ 注册自定义切手技选项(返回tab文本句柄 可以动态修改) """
         return getattr(self.getBattleExpansionAPI(), "ADD_CUSTOM_QUICK_STRIKE_BUTTON")(ueryId, renderText, docRender)
-    
+
     def regCustomQuickStrike(self, regQuickId=5000, regObj=None):
         """ 注册自定义切手技WITH ID """
         return getattr(self.getBattleExpansionAPI(), "REG_CUSTOM_QUICK_FUNC_WITH_ID")(regQuickId, regObj)
@@ -329,9 +358,19 @@ class KATE_API(_KAPI):
         return getattr(self.getBattleExpansionAPI(), "GET_ATE_USER_RUNTIME")()
 
     def getBattleHandlerCls(self):
-        # type: () -> type[IBattleHandle]
+        # type: () -> type[IBattleHandler]
         """ 获取BattleHandler类 """
         return getattr(self.getBattleExpansionAPI(), "GET_ATE_BATTLE_HANDLER_CLS")()
+    
+    def regCustomJsonATE(self, joDict):
+        # type: (dict) -> None
+        """ 注册JSON ATE扩展 注意:静态资源的合批处理是在AddonFinish事件下进行的 请在此之前调用 亦或者将监听事件优先级提高(内部使用0) """
+        return getattr(self.getBattleExpansionAPI(), "JSON_CLIENT_REG_CUSTOM_ATE")(joDict)
+
+    def getRuntimeATECustomId(self):
+        # type: () -> str
+        """ 获取 当前运行的ATE自定义ID 若为内置ATE/非运行状态则返回空字符串 """
+        return getattr(self.getBattleExpansionAPI(), "GET_RUN_ATE_CUSTOM_ID")()
 
 class KRES_API(_KAPI):
     def getPlayerRes(self):
@@ -349,7 +388,21 @@ class KRES_API(_KAPI):
 
     def regClientPlayerStaticRes(self, resDict={}):
         # type: (dict) -> None
-        """ 注册客户端玩家静态资源(类JSON格式) """
+        """ 注册客户端玩家静态资源(类JSON格式) 注意:静态资源的合批处理是在AddonFinish事件下进行的 请在此之前调用 亦或者将监听事件优先级提高(内部使用0) """
         return getattr(self.getBaseAPI(), "REG_CLIENT_PLAYER_STATIC_RES")(resDict)
+
+@OO_MCLS_REF.lazyFuncBindTarget("GL_API")
+def STATIC_LOCAL_PLAYER_EFFECT_LISTENER(queryBindName):
+    """ 装饰器静态注册玩家效果监听器 """
+    def _loader(func):
+        return func
+    return _loader
+
+@OO_MCLS_REF.lazyFuncBindTarget("GL_API")
+def STATIC_LOCAL_MOB_EFFECT_LISTENER(queryBindName):
+    """ 装饰器静态注册全生物效果监听器 """
+    def _loader(func):
+        return func
+    return _loader
 
 KAPI = kapi = _KAPI()

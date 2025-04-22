@@ -91,20 +91,20 @@ class KBaseAPI:
 
     def getBaseAPI(self):
         return self.impModFile("GL_API")
-    
+
     def hasMod(self):
         # type: () -> bool
         """ 获取KID动作优化是否已经加载 """
         if self.impModFile("__init__"):
             return True
         return False
-    
+
     def _hasMod(self):
         state = self.hasMod()
         if not state:
             self.cout("未找到KID动作优化")
         return state
-    
+
     def getStaticPlayerRes(self):
         # type: () -> dict
         """ 获取动作优化配置中的静态玩家资源 """

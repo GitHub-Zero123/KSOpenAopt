@@ -155,7 +155,7 @@ class OPTIONS_PAN:
         # 优先级数据返回 越小越靠前 单次更新
         return self.priority
 
-class IBattleHandle:
+class IBattleHandler:
     def __init__(self, args):
         # type: (dict) -> None
         self._contextArgs = args or {}

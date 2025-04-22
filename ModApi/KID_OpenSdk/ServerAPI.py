@@ -42,6 +42,10 @@ class KSharedMemory(_SharedMemory):
         if not key in dic:
             dic[key] = list()
         return dic[key]
+    
+    def addHandlesView(self, typeName, handle):
+        # type: (str, KResHandle) -> None
+        self.getHandlesView(typeName).append(handle)
 
     def callResHandles(self, typeName="", playerId="", key="", value="", tempData={}):
         # type: (str, str, str, str, dict) -> None
@@ -75,6 +79,14 @@ class KSharedMemory(_SharedMemory):
         # type: () -> list[KResHandle]
         return self.getHandlesView("anims")
 
+    def addModelHandle(self, handle):
+        # type: (KResHandle) -> None
+        self.addHandlesView("model", handle)
+
+    def addAnimHandle(self, handle):
+        # type: (KResHandle) -> None
+        self.addHandlesView("anims", handle)
+
 class KResHandle:
     def resCheck(self, playerId, resKey, resData, argsDict):
         # 校验资源数据 返回的数据将传递给下一个Handle对象 直到最终结束 选中唯一的结果调用update
@@ -90,7 +102,7 @@ class _KAPI(KBaseAPI):
         self._sharedMemory = None   # type: KSharedMemory | None
 
     def getSharedMemory(self):
-        """ [未启用] 获取动作优化相关共享管理内存 """
+        """ 获取动作优化相关共享管理内存 """
         if not self._sharedMemory:
             self._sharedMemory = KSharedMemory()
         return self._sharedMemory
@@ -115,11 +127,28 @@ class _KAPI(KBaseAPI):
         # type: (str, bool) -> None
         """ [因兼容问题暂时弃用] 服务端隐藏玩家盔甲 """
         return getattr(self.getBaseAPI(), "SERVER_HIDE_PLAYER_ARMOR")(playerId, state)
-    
+
     def getPlayerRes(self, playerId):
         # type: (str) -> KRES_API
         """ 获取玩家资源API """
         return KRES_API(playerId)
+
+    def regCallFunction(self, funcName, func):
+        # type: (str, function) -> None
+        """ 在服务端注册允许调用函数 """
+        return getattr(self.getBaseAPI(), "REG_SERVER_ALLOW_CALL")(funcName, func)
+
+    def getPlayerDamage(self, playerId, useOffHand=False):
+        """ 获取玩家默认伤害(计算手持物品及BUFF) """
+        return getattr(self.getBaseAPI(), "GET_PLAYER_BASE_DAMAGE")(playerId, useOffHand)
+
+    def hitMobVec(self, playerId, targetId, hitVc=(0, 0, 0)):
+        """ 为指定目标实体添加击退向量(相对坐标系) """
+        return getattr(self.getBaseAPI(), "SERVER_HIT_MOB_VEC")(playerId, targetId, hitVc)
+
+    def aoeHurtMobs(self, playerId, damageMut=1.0, damageRange=3.0, damageType=0, shake=False, hitVec=(0.0, 0.0, 0.0), useOffHand=True, breakBlockEffect=False):
+        """ 根据参数对AOE半径内实体造成特定参数系数的伤害 """
+        return getattr(self.getBaseAPI(), "SERVER_HURT_AOE_MOBS")(playerId, damageMut, damageRange, damageType, shake, hitVec, useOffHand, breakBlockEffect)
 
 class KATE_API(_KAPI):
     def getATEApi(self):
